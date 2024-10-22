@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <SiteHeader /> <!-- 헤더 추가 -->
+    <SiteHeader v-if="$route.path !== '/'" />
     <router-view />
     <footer class="site-footer">
       <SiteFooter /> <!-- 푸터 추가 -->
