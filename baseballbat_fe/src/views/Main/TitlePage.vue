@@ -8,6 +8,10 @@
         </span>
     </div>
 
+    <div>
+        왜 안나와 왜왜
+    </div>
+
     <div class="example">asdasdasds </div>
 </template>
 <script>

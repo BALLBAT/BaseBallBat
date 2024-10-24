@@ -22,7 +22,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav mx-auto d-flex align-items-center">
             <li class="nav-item">
-              <router-link class="nav-link" to="/main">홈</router-link>
+              <router-link class="nav-link" to="/homemain">홈</router-link>
             </li>
             <li class="nav-item">
               <router-link class="nav-link" to="/main">매칭</router-link>
@@ -50,9 +50,9 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 export default {
   name: "SiteHeader",
   methods: {
+    // 로그인 버튼 클릭시 로그인 페이지 이동
     login() {
-      // 로그인 버튼 클릭 시 동작할 로직을 추가합니다.
-      console.log("로그인 버튼이 클릭되었습니다!");
+      this.$router.push('/login');
     },
   },
 };
