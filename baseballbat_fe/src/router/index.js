@@ -14,18 +14,7 @@ const routes = [
     component: () => import("../views/Main/MainPage.vue")
   },
 
-  {
-    path: '/title',
-    name: 'titlepage',
-    component: () => import("../views/Main/TitlePage.vue")
-  },
-
-  {
-    path: '/home-main',
-    name: 'homemain',
-    component: () => import("../views/Home/HomeMain.vue")
-  },
-
+  
 // 유저 관련 페이지
 
   // 로그인 페이지

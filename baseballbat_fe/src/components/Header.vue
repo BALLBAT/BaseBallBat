@@ -22,10 +22,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav mx-auto d-flex align-items-center">
             <li class="nav-item">
-              <router-link class="nav-link" to="/homemain">홈</router-link>
+              <router-link class="nav-link" to="/main">홈</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/main">매칭</router-link>
+              <router-link class="nav-link" to="/matching">매칭</router-link>
             </li>
             <li class="nav-item">
               <router-link class="nav-link" to="/trade">중고거래</router-link>
