@@ -5,7 +5,7 @@
     <section class="hero-section">
       <h1>직관적으로, 야구를 더 쉽게 즐기세요!</h1>
       <p>야구 입문자를 위한 최고의 가이드</p>
-      <button @click="navigateTo('signup')">지금 가입하기</button>
+      <button @click="navigateTo('login')">지금 가입하기</button>
     </section>
 
     <!-- 주요 기능 Section -->

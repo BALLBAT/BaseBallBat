@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <SiteHeader v-if="$route.path !== '/'" />
-    <router-view />
+    <div class="content-wrapper">
+      <router-view />
+    </div>
     <footer class="site-footer">
       <SiteFooter /> <!-- 푸터 추가 -->
     </footer>
@@ -33,17 +35,10 @@ export default {
   min-height: 100vh;
 }
 
-nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    // &.router-link-exact-active {
-    //   color: #42b983;
-    // }
-  }
+.content-wrapper {
+  flex: 1;
+  width: 100%;
+  padding-top: 60px; /* 헤더 높이만큼 패딩 추가 */
 }
 
 .site-footer {
