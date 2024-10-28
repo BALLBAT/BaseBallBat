@@ -34,6 +34,9 @@
               <router-link class="nav-link" to="/about">구장 정보</router-link>
             </li>
             <li class="nav-item">
+              <router-link class="nav-link" to="/mypage" >마이 페이지</router-link>
+            </li>
+            <li class="nav-item">
               <button class="btn btn-success" @click="login">로그인</button>
             </li>
           </ul>
@@ -63,6 +66,10 @@ export default {
   height: 60px;
   display: flex;
   align-items: center;
+  position: fixed; /* 네비게이션 바 고정 */
+  width: 100%;
+  top: 0;
+  z-index: 1000; /* 콘텐츠보다 앞에 배치되도록 설정 */
 }
 
 .container-fluid {
