@@ -1,0 +1,11 @@
+@font-face {
+    font-family: 'KBO Dia Gothic';
+    src: url('@/assets/fonts/KBO-Dia-Gothic_medium.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  body {
+    font-family: 'KBO Dia Gothic', sans-serif;
+  }
+  
