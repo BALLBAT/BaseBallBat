@@ -31,7 +31,7 @@
               <router-link class="nav-link" to="/trade">중고거래</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/about">구장 정보</router-link>
+              <router-link class="nav-link" to="/teaminfo">구장 정보</router-link>
             </li>
             <li class="nav-item">
               <router-link class="nav-link" to="/mypage" >마이 페이지</router-link>
