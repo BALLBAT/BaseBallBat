@@ -151,7 +151,7 @@ export default {
   }
   .ssg-landers {
     top: 25%;
-    left: 25%;
+    left: 15%;
   }
   .kiwoom-heroes {
     top: 25%;
@@ -159,27 +159,27 @@ export default {
   }
   .hanwha-eagles {
     top: 51%;
-    left: 40%;
+    left: 36%;
   }
   .kia-tigers {
     top: 78%;
-    left: 31%;
+    left: 24%;
   }
   .samsung-lions {
     top: 62%;
-    left: 59%;
+    left: 62%;
   }
   .lotte-giants {
     top: 78%;
-    left: 68%;
+    left: 75%;
   }
   .nc-dinos {
     top: 75%;
-    left: 58%;
+    left: 61%;
   }
   .kt-wiz {
     top: 35%;
-    left: 38%;
+    left: 33%;
   }
 }
 </style>
