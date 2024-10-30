@@ -124,7 +124,7 @@ export default {
       }
     },
     editProfile() {
-      // 프로필 수정 로직
+      this.$router.push('/profile-edit');
     },
   },
 };

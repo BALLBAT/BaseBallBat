@@ -35,6 +35,12 @@ const routes = [
     name: 'mypage',
     component: () => import("../views/User/MyPage.vue")
   },
+  // 프로필 수정 페이지
+  {
+    path: '/profile-edit',
+    name: 'profileedit',
+    component: () => import("../views/User/ProfileEdit.vue")
+  },
 
 // 매칭 게시판
 
