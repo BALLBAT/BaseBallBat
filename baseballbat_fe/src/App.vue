@@ -25,7 +25,7 @@ export default {
 
 <style lang="scss">
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'KBO-Dia-Gothic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -43,5 +43,14 @@ export default {
 
 .site-footer {
   margin-top: auto; /* 푸터를 페이지 하단에 고정 */
+}
+
+@font-face {
+  font-family: 'KBO-Dia-Gothic';
+  src: url('@/assets/fonts/KBO-Dia-Gothic_medium.woff') format('woff');
+}
+
+body {
+  font-family: 'KBO-Dia-Gothic', sans-serif;
 }
 </style>
