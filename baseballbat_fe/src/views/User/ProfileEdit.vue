@@ -8,6 +8,7 @@
           <label for="nickname" class="label-left">닉네임</label>
           <div class="input-with-button">
             <input type="text" id="nickname" v-model="profile.nickname" class="short-input" />
+            <button type="button" class="edit-button">중복확인</button>
             <button type="button" class="edit-button">수정하기</button>
           </div>
         </div>
@@ -28,7 +29,7 @@
         <div class="form-group">
           <label for="favorite-team" class="label-left">선호 구단</label>
           <div class="input-with-button">
-            <select id="favorite-team" v-model="profile.favoriteTeam" class="short-input">
+            <select id="favorite-team" v-model="profile.favoriteTeam" class="short-input" style="width: 70%;">
               <option value="">구단을 선택하세요</option>
               <option value="LG 트윈스">LG 트윈스</option>
               <option value="두산 베어스">두산 베어스</option>
@@ -47,16 +48,19 @@
         <div class="form-group">
           <label for="address" class="label-left">주소 설정하기</label>
           <div class="input-with-button">
-            <input type="text" id="address" v-model="profile.address" placeholder="주소를 입력하세요" class="short-input" />
+            <input type="text" id="address" v-model="profile.address" placeholder="주소를 입력하세요" class="short-input" style="width: 80%;" />
             <button type="button" class="edit-button" @click="fetchAddress">주소 검색</button>
           </div>
-          <input type="text" id="detail-address" v-model="profile.detailAddress" placeholder="상세 주소를 입력하세요" class="short-input" />
+          <div class="input-with-button" style="margin-top: 10px;">
+            <input type="text" id="detail-address" v-model="profile.detailAddress" placeholder="상세 주소를 입력하세요" class="short-input" style="width: 60%;" />
+            <button type="button" class="edit-button">수정하기</button>
+          </div>
         </div>
       </form>
     </section>
 
     <!-- 비밀번호 변경 섹션 -->
-    <section class="password-change-section">
+    <section class="password-change-section" style="margin-top: 50px;">
       <h2>비밀번호 변경</h2>
       <div class="form-group password-group">
         <label for="new-password" class="label-left">새 비밀번호</label>
@@ -68,6 +72,7 @@
         <label for="confirm-password" class="label-left">새 비밀번호 확인</label>
         <div class="input-with-button">
           <input type="password" id="confirm-password" v-model="profile.confirmPassword" class="short-input" />
+          <button type="button" class="edit-button">수정하기</button>
         </div>
       </div>
     </section>
@@ -210,21 +215,6 @@ select {
   .profile-edit-container {
     padding: 10px;
   }
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  select {
-    font-size: 14px;
-  }
-  .short-input {
-    width: 100%;
-  }
-  .form-group {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .edit-button {
-    align-self: flex-end;
-  }
 }
+
 </style>
