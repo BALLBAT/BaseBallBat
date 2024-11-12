@@ -1,26 +1,22 @@
 <template>
-  <div class="trade-page-container" style="margin-top: 60px; max-width: 1200px;">
-    <!-- 페이지 소개 섹션 -->
-    <section class="intro-section">
-      <h1>중고 거래</h1>
-      <p>팀 팬들 간에 중고 물품을 거래하고, 새로운 팬 아이템을 찾아보세요!</p>
+  <div class="second-hand-page-container" style="margin-top: 60px; max-width: 1400px;">
+    <!-- 검색 섹션 -->
+    <section class="search-section">
+      <input type="text" v-model="searchQuery" placeholder="상품명을 검색하세요" class="search-input" />
+      <button @click="searchItems" class="search-button">검색</button>
     </section>
 
-    <!-- 카테고리 선택 섹션 -->
-    <section class="category-selection-section">
-      <h2>카테고리 선택</h2>
-      <div class="categories">
-        <button v-for="category in categories" :key="category" @click="selectCategory(category)" class="category-button">
-          {{ category }}
-        </button>
-      </div>
-    </section>
-
-    <!-- 물품 목록 섹션 -->
+    <!-- 거래 물품 목록 섹션 -->
     <section class="item-list-section">
       <h2>거래 물품 목록</h2>
+      <!-- 카테고리 선택 -->
+      <div class="category-selection">
+        <span v-for="category in categories" :key="category" @click="selectCategory(category)" :class="['category-text', { 'selected-category': selectedCategory === category }]">
+          {{ category }}
+        </span>
+      </div>
       <div v-if="items.length" class="item-cards">
-        <div v-for="item in items" :key="item.id" class="item-card">
+        <div v-for="item in filteredItems" :key="item.id" class="item-card">
           <img :src="item.image" alt="item.name" class="item-image" />
           <h3>{{ item.name }}</h3>
           <p>{{ item.price }}원</p>
@@ -47,12 +43,26 @@ export default {
     return {
       categories: ['유니폼', '응원 도구', '기념품', '기타'],
       items: [],
+      searchQuery: '',
+      selectedCategory: '',
     };
+  },
+  computed: {
+    filteredItems() {
+      return this.items.filter(item => {
+        const matchesCategory = this.selectedCategory ? item.category === this.selectedCategory : true;
+        const matchesSearch = item.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+    }
   },
   methods: {
     selectCategory(category) {
-      // 선택된 카테고리의 물품을 불러오는 로직
-      console.log('카테고리 선택:', category);
+      this.selectedCategory = category;
+    },
+    searchItems() {
+      // 검색 버튼 클릭 시 로직
+      console.log('검색어:', this.searchQuery);
     },
     viewItemDetail(itemId) {
       // 물품 상세 페이지로 이동하는 로직
@@ -61,14 +71,14 @@ export default {
     },
     goToRegisterPage() {
       // 물품 등록 페이지로 이동
-      this.$router.push('/register-item');
-    },
+      this.$router.push('/trade-create');
+    }
   },
 };
 </script>
 
 <style scoped>
-.trade-page-container {
+.second-hand-page-container {
   padding: 20px;
   margin: 80px auto 0 auto;
   display: flex;
@@ -76,29 +86,27 @@ export default {
   align-items: center;
 }
 
-.intro-section {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.category-selection-section {
-  margin-bottom: 30px;
-  width: 100%;
-  text-align: center;
-}
-
-.categories {
+.search-section {
   display: flex;
   justify-content: center;
+  margin-bottom: 20px;
   gap: 10px;
-  flex-wrap: wrap;
+  width: 100%;
+  max-width: 600px;
 }
 
-.category-button {
-  background-color: #007bff;
+.search-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 70%;
+}
+
+.search-button {
+  background-color: #212529; /* 메인 색상 */
   color: #fff;
   border: none;
-  padding: 10px 15px;
+  padding: 12px 25px;
   border-radius: 5px;
   cursor: pointer;
 }
@@ -107,8 +115,34 @@ export default {
   margin-bottom: 30px;
   width: 100%;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.category-selection {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.category-text {
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 5px 10px;
+}
+
+.selected-category {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.item-cards {
+  display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
+  width: 100%;
 }
 
 .item-card {
@@ -153,13 +187,21 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .second-hand-page-container {
+    flex-direction: column;
+    align-items: center;
+  }
   .item-list-section {
     flex-direction: column;
     align-items: center;
+    width: 100%;
   }
   .item-card {
     width: 100%;
     max-width: 300px;
+  }
+  .search-input {
+    width: 100%;
   }
 }
 </style>

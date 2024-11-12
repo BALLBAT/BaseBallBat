@@ -56,6 +56,12 @@ const routes = [
     name: 'matchingdetail',
     component: () => import("../views/Matching/MatchingDetail.vue")
   },
+  // 매칭 게시판 등록 페이지
+  {
+    path: '/matching-create',
+    name: 'matchingcreate',
+    component: () => import("../views/Matching/MatchingCreate.vue")
+  },
 
 // 중고거래 관련 페이지
 
@@ -70,6 +76,12 @@ const routes = [
     path: '/trade-detail',
     name: 'tradedetail',
     component: () => import("../views/Trade/TradeDetail.vue")
+  },
+  // 중고거래 물품 등록 페이지
+  {
+    path: '/trade-create',
+    name: 'tradecreate',
+    component: () => import("../views/Trade/TradeCreate.vue")
   },
 
 // 결제 페이지
