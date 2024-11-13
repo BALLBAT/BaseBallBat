@@ -10,7 +10,7 @@
     <section class="team-and-category-section">
       <div class="team-selection-section">
         <label for="team-select" class="team-label">구단 선택:</label>
-        <select id="team-select" v-model="selectedTeam" @change="fetchTeamRestaurants" class="team-select">
+        <select id="team-select" v-model="selectedTeam" @change="moveToTeamStadium" class="team-select">
           <option value="">구단을 선택하세요</option>
           <option value="LG 트윈스">LG 트윈스</option>
           <option value="두산 베어스">두산 베어스</option>
@@ -26,7 +26,7 @@
       </div>
       <div class="category-section">
         <div class="category-items">
-          <div v-for="category in categories" :key="category" @click="filterByCategory(category)" class="category-item">
+          <div v-for="category in categories" :key="category" @click="filterByCategory(category)" :class="['category-item', { 'active': selectedCategory === category }]">
             {{ category }}
           </div>
         </div>
@@ -40,13 +40,18 @@
       </div>
       <div class="restaurant-info-container">
         <div v-if="selectedRestaurant">
-          <h3>{{ selectedRestaurant.name }}</h3>
-          <p>주요 메뉴: {{ selectedRestaurant.mainMenu }}</p>
-          <p>평점: {{ selectedRestaurant.rating }} / 5</p>
+          <h3>{{ selectedRestaurant.place_name }}</h3>
+          <p>주소: {{ selectedRestaurant.address_name }}</p>
+          <p>도로명 주소: {{ selectedRestaurant.road_address_name }}</p>
+          <p>카테고리: {{ selectedRestaurant.category_group_name }} - {{ selectedRestaurant.category_name }}</p>
+          <p>전화번호: {{ selectedRestaurant.phone }}</p>
+          <p>거리: {{ selectedRestaurant.distance }}m</p>
+          <p>lat: {{selectedRestaurant.y}}, lng: {{selectedRestaurant.x}}</p>
+          <a :href="selectedRestaurant.place_url" target="_blank" class="place-link">카카오맵에서 보기</a>
           <button @click="addToFavorites(selectedRestaurant.id)" class="favorites-button">즐겨찾기 추가</button>
         </div>
         <div v-else>
-          <p>지도를 클릭하여 맛집 정보를 확인하세요.</p>
+          <p>카테고리를 선택하거나 지도를 클릭해서 맛집 정보를 확인하세요.</p>
         </div>
       </div>
     </section>
@@ -66,16 +71,33 @@
 </template>
 
 <script>
+/* global kakao */
 export default {
   data() {
     return {
       searchQuery: '',
       selectedTeam: '',
-      categories: ['한식', '양식', '중식', '일식', '디저트', '카페'],
+      selectedCategory: '',
+      categories: ['한식', '양식', '중식', '일식', '카페'],
       restaurants: [],
       recommendedRestaurants: [],
       filteredRestaurants: [],
       selectedRestaurant: null,
+      map: null,
+      ps: null, // 장소 검색 객체
+      markers: [], // 생성된 마커를 저장
+      teamStadiums: {
+        'LG 트윈스': { lat: 37.5121513808403, lng: 127.071909507224 },
+        '두산 베어스': { lat: 37.5121513808403, lng: 127.071909507224 },
+        'SSG 랜더스': { lat: 37.436998685442084, lng: 126.69327612453377 },
+        '키움 히어로즈': { lat: 37.4982338495579, lng: 126.867104761712 },
+        '한화 이글스': { lat: 36.3161617310226, lng: 127.431535001435 },
+        'KIA 타이거즈': { lat: 35.16820922209541, lng: 126.88911206152956 },
+        '삼성 라이온즈': { lat: 35.8410595632468, lng: 128.681659448344 },
+        '롯데 자이언츠': { lat: 35.194017568250274, lng: 129.06154402103502 },
+        'NC 다이노스': { lat: 35.22280070751199, lng: 128.5820053292696 },
+        'KT 위즈': { lat: 37.2997302532973, lng: 127.009772045935 },
+      },
     };
   },
   methods: {
@@ -85,12 +107,37 @@ export default {
       // 예시로 모든 맛집을 불러오는 대신 구단별 필터링 로직 추가 필요
     },
     searchRestaurants() {
-      // 검색 로직
-      console.log('검색어:', this.searchQuery);
+      if (!this.searchQuery) return;
+
+      // 카카오 장소 검색 객체를 이용해 검색
+      this.ps.keywordSearch(this.searchQuery, (data, status) => {
+        if (status === kakao.maps.services.Status.OK) {
+          this.clearMarkers();
+          this.restaurants = data;
+
+          data.forEach((place) => {
+            this.addMarker(new kakao.maps.LatLng(place.y, place.x), place);
+          });
+        }
+      });
     },
     filterByCategory(category) {
-      // 카테고리 필터 로직
-      console.log('카테고리 선택:', category);
+      this.selectedCategory = category;
+      const center = this.map.getCenter();
+      // 현재 지도의 중심 위치를 기준으로 카테고리 검색
+      this.ps.keywordSearch(category, (data, status) => {
+        if (status === kakao.maps.services.Status.OK) {
+          this.clearMarkers();
+          this.restaurants = data;
+
+          data.forEach((place) => {
+            this.addMarker(new kakao.maps.LatLng(place.y, place.x), place);
+          });
+        }
+      }, {
+        location: new kakao.maps.LatLng(center.getLat(), center.getLng()),
+        radius: 5000
+      });
     },
     addToFavorites(restaurantId) {
       // 즐겨찾기 추가 로직
@@ -100,30 +147,64 @@ export default {
       // 맛집 상세보기 로직
       console.log('맛집 보기:', restaurantId);
     },
+    addMarker(position, place) {
+      const marker = new kakao.maps.Marker({
+        position,
+        map: this.map,
+      });
+
+      // 마커 클릭 시 해당 맛집 정보 표시
+      kakao.maps.event.addListener(marker, 'click', () => {
+        this.selectedRestaurant = place;
+      });
+
+      this.markers.push(marker);
+    },
+    clearMarkers() {
+      // 지도에서 모든 마커를 제거
+      this.markers.forEach((marker) => marker.setMap(null));
+      this.markers = [];
+    },
     selectRestaurant(restaurant) {
       this.selectedRestaurant = restaurant;
     },
+    moveToTeamStadium() {
+      if (this.selectedTeam && this.teamStadiums[this.selectedTeam]) {
+        const { lat, lng } = this.teamStadiums[this.selectedTeam];
+        const moveLatLng = new kakao.maps.LatLng(lat, lng);
+        this.map.setCenter(moveLatLng);
+      }
+    }
   },
-mounted() {
-  // 카카오 지도 API 초기화 로직
-  /* eslint-disable no-undef */
-  if (typeof kakao !== 'undefined') {
-    const container = document.getElementById('kakao-map');
-    const options = {
-      center: new kakao.maps.LatLng(37.5665, 126.9780),
-      level: 4,
-    };
-    const map = new kakao.maps.Map(container, options);
+  mounted() {
+    // 현재 위치로 지도 초기화
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const container = document.getElementById('kakao-map');
+        const options = {
+          center: new kakao.maps.LatLng(lat, lng),
+          level: 4,
+        };
+        this.map = new kakao.maps.Map(container, options);
 
-    // 지도 클릭 이벤트 설정
-    kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
-      const latlng = mouseEvent.latLng;
-      console.log('클릭한 위치:', latlng);
-      // 예시: 클릭한 위치에 따른 맛집 정보를 업데이트
-      // this.selectRestaurant(...);
-    });
-  }
-},
+        // 장소 검색 서비스 객체 생성
+        this.ps = new kakao.maps.services.Places();
+      });
+    } else {
+      // Geolocation을 지원하지 않는 경우 기본 위치 설정
+      const container = document.getElementById('kakao-map');
+      const options = {
+        center: new kakao.maps.LatLng(37.5665, 126.9780),
+        level: 4,
+      };
+      this.map = new kakao.maps.Map(container, options);
+
+      // 장소 검색 서비스 객체 생성
+      this.ps = new kakao.maps.services.Places();
+    }
+  },
 };
 </script>
 
@@ -205,6 +286,11 @@ mounted() {
   margin: 5px;
 }
 
+.category-item.active {
+  background-color: #007bff;
+  color: #fff;
+}
+
 .restaurant-map-info-section {
   display: flex;
   gap: 20px;
@@ -237,6 +323,13 @@ mounted() {
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
+}
+
+.place-link {
+  display: block;
+  margin-top: 10px;
+  color: #007bff;
+  text-decoration: none;
 }
 
 .recommended-section {
