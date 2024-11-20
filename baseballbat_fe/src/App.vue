@@ -20,6 +20,7 @@ export default {
     SiteHeader, // 헤더 컴포넌트를 사용할 수 있도록 설정
     SiteFooter, // 푸터 컴포넌트를 사용할 수 있도록 설정
   },
+  created() { console.log('App component created'); }
 };
 </script>
 
