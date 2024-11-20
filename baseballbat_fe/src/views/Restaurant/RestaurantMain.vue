@@ -104,6 +104,8 @@ export default {
     searchRestaurants() {
       if (!this.searchQuery) return;
 
+      const center = this.map.getCenter(); // 현재 지도의 중심 좌표를 가져옵니다.
+
       this.ps.keywordSearch(this.searchQuery, (data, status) => {
         if (status === kakao.maps.services.Status.OK) {
           this.clearMarkers();
@@ -113,13 +115,16 @@ export default {
             this.addMarker(new kakao.maps.LatLng(place.y, place.x), place);
           });
         }
+      }, {
+        location: new kakao.maps.LatLng(center.getLat(), center.getLng()), // 현재 지도의 중심 좌표를 기준으로 검색합니다.
+        radius: 5000 // 반경 5km 내에서 검색합니다.
       });
 
       console.log("버튼 클릭되어서 검색이 실행되어왔습니다");
     },
     filterByCategory(category) {
       this.selectedCategory = category;
-      const center = this.map.getCenter();
+      const center = this.map.getCenter(); // 현재 지도의 중심 좌표를 가져옵니다.
 
       this.ps.keywordSearch(category, (data, status) => {
         if (status === kakao.maps.services.Status.OK) {
@@ -131,8 +136,8 @@ export default {
           });
         }
       }, {
-        location: new kakao.maps.LatLng(center.getLat(), center.getLng()),
-        radius: 5000
+        location: new kakao.maps.LatLng(center.getLat(), center.getLng()), // 현재 지도의 중심 좌표를 기준으로 검색합니다.
+        radius: 5000 // 반경 5km 내에서 검색합니다.
       });
     },
     addToFavorites(restaurantId) {
@@ -182,7 +187,7 @@ export default {
       });
     },
   },
-  mounted() {
+    mounted() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         const lat = position.coords.latitude;

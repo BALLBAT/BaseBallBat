@@ -1,5 +1,3 @@
-// 로그인 페이지
-// 기본 이이디 비밀번호로 로그인하고, 소셜 로그인 버튼 추가, 회원가입 버튼 필요
 <template>
   <div class="login-container">
     <div class="login-section left-section">
@@ -7,22 +5,34 @@
       <form @submit.prevent="login">
         <input type="text" v-model="username" placeholder="아이디" />
         <input type="password" v-model="password" placeholder="비밀번호" />
+        <button type="submit" class="login-button">로그인</button>
       </form>
-            <div class="additional-options">
+      <div class="additional-options">
         <span @click="register" class="register-button option-text">회원가입</span>
         <span class="option-divider">|</span>
         <span @click="findId" class="find-button option-text">아이디 찾기</span>
         <span class="option-divider">|</span>
         <span @click="findPassword" class="find-button option-text">비밀번호 찾기</span>
       </div>
-      <button @click="login" class="login-button">로그인</button>
     </div>
 
     <div class="login-section right-section">
       <h3>SNS 계정으로 로그인하기</h3>
       <button @click="loginWith('naver')" class="sns-button naver">Naver 계정으로 시작</button>
       <button @click="loginWith('kakao')" class="sns-button kakao">Kakao 계정으로 시작</button>
-      <button @click="loginWith('google')" class="sns-button google">Google 계정으로 시작</button>
+      <div id="g_id_onload"
+           data-client_id="69828466810-cho87reh7vfoke4ef242tr6g610bsupj.apps.googleusercontent.com"
+           data-callback="handleCredentialResponse"
+           data-auto_select="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-shape="rectangular"
+           data-theme="outline"
+           data-text="signin_with"
+           data-size="large"
+           data-logo_alignment="left">
+      </div>
     </div>
   </div>
 </template>
@@ -35,9 +45,35 @@ export default {
       password: '',
     };
   },
+mounted() {
+  // Google Identity Services 스크립트가 로드된 후 호출되는 콜백
+  window.handleCredentialResponse = (response) => {
+    console.log('Encoded JWT ID token: ' + response.credential);
+
+    // 이후 JWT 토큰을 백엔드로 전송하여 사용자 검증
+    this.verifyWithBackend(response.credential);
+  };
+
+  // Google 계정 ID 초기화
+  window.google.accounts.id.initialize({
+    client_id: '69828466810-cho87reh7vfoke4ef242tr6g610bsupj.apps.googleusercontent.com',
+    callback: this.handleCredentialResponse,
+  });
+
+  // Google 로그인 버튼을 렌더링
+  window.google.accounts.id.renderButton(
+    document.querySelector('.g_id_signin'),
+    {
+      theme: 'outline',
+      size: 'large'
+    }
+  );
+},
+
   methods: {
     login() {
       // 로그인 로직 처리
+      console.log('일반 로그인 시도:', this.username);
     },
     register() {
       // 회원가입 페이지로 이동
@@ -49,15 +85,48 @@ export default {
     findPassword() {
       // 비밀번호 찾기 페이지로 이동
     },
-    loginWith() {
-      // SNS 로그인 처리
+    signInWithGoogle() {
+      // Google 소셜 로그인 처리
+      window.google.accounts.id.initialize({
+        client_id: '69828466810-cho87reh7vfoke4ef242tr6g610bsupj.apps.googleusercontent.com',
+        callback: this.handleCredentialResponse
+      });
+      window.google.accounts.id.prompt();
     },
+    loginWith(provider) {
+      // 다른 소셜 로그인 (Naver, Kakao) 처리
+      this.$auth.authenticate(provider).then(response => {
+        console.log(response);
+        // 추가적인 로직 처리
+      }).catch(error => {
+        console.error(error);
+      });
+    },
+    verifyWithBackend(idToken) {
+      // 구글에서 받은 JWT 토큰을 백엔드로 전송하여 사용자 인증 처리
+      fetch('http://localhost:8080/api/google-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Server Response:', data);
+        // 인증 성공 후 홈 페이지로 리디렉션
+        this.$router.push('/home');
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
   },
 };
 </script>
 
 <style scoped>
-/* 전체 로그인 컨테이너 */
+/* 기존 스타일 그대로 사용 */
 .login-container {
   display: flex;
   justify-content: center;
@@ -134,7 +203,6 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* margin-top: 10px; */
 }
 
 .option-text {

@@ -1,4 +1,3 @@
-// 메인 페이지
 <template>
   <div class="main-container">
     <!-- Hero Section -->
@@ -21,10 +20,6 @@
       <div class="feature">
         <h2>맛집 리스트</h2>
         <p>구장 주변의 맛집을 추천해드립니다.</p>
-      </div>
-      <div class="feature">
-        <h2>KBO 구단 정보</h2>
-        <p>각 구단의 주요 정보를 한눈에 확인하세요.</p>
       </div>
     </section>
   </div>
@@ -74,7 +69,7 @@ export default {
 
 .features-section {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-evenly;
   margin: 40px 0;
   flex-wrap: wrap;
 }
