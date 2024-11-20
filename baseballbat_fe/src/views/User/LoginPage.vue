@@ -18,7 +18,7 @@
 
     <div class="login-section right-section">
       <h3>SNS 계정으로 로그인하기</h3>
-      <button @click="loginWith('naver')" class="sns-button naver">Naver 계정으로 시작</button>
+      <div id="naverIdLogin"></div>
       <button @click="loginWith('kakao')" class="sns-button kakao">Kakao 계정으로 시작</button>
       <div id="g_id_onload"
            data-client_id="69828466810-cho87reh7vfoke4ef242tr6g610bsupj.apps.googleusercontent.com"
@@ -68,6 +68,20 @@ mounted() {
       size: 'large'
     }
   );
+
+  // 네이버 로그인 버튼 초기화
+  const naverScript = document.createElement('script');
+  naverScript.src = "https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.0.js";
+  naverScript.onload = () => {
+    const naverLogin = new window.naver.LoginWithNaverId({
+      clientId: '1SzX67SVz98SbWZaCDoK', // 발급받은 네이버 Client ID로 변경
+      callbackUrl: 'http://localhost:8080/naver/callback',
+      isPopup: true, // 팝업 형태로 로그인을 진행할지 여부
+      loginButton: { color: 'green', type: 3, height: '40' },
+    });
+    naverLogin.init();
+  };
+  document.body.appendChild(naverScript);
 },
 
   methods: {
@@ -94,13 +108,9 @@ mounted() {
       window.google.accounts.id.prompt();
     },
     loginWith(provider) {
-      // 다른 소셜 로그인 (Naver, Kakao) 처리
-      this.$auth.authenticate(provider).then(response => {
-        console.log(response);
-        // 추가적인 로직 처리
-      }).catch(error => {
-        console.error(error);
-      });
+      if (provider === 'kakao') {
+        // 카카오 로그인 로직 (추후 추가 예정)
+      }
     },
     verifyWithBackend(idToken) {
       // 구글에서 받은 JWT 토큰을 백엔드로 전송하여 사용자 인증 처리
