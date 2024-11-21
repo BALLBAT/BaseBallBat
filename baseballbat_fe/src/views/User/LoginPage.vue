@@ -64,9 +64,20 @@ export default {
       {
         theme: 'outline',
         size: 'large',
-        width: '300px'
+        width: 222, // 원하는 너비 설정
+        height: 49
       }
     );
+
+  // 렌더링된 내부 요소 크기 조정
+  setTimeout(() => {
+    const googleInnerDiv = document.querySelector('.nsm7Bb-HzV7m-LgbsSe-MJoBVe');
+    if (googleInnerDiv) {
+      googleInnerDiv.style.width = '222px';
+      googleInnerDiv.style.height = '49px';
+      googleInnerDiv.style.lineHeight = '49px'; // 텍스트 정렬
+    }
+  }, 500); // DOM이 생성된 후 실행
 
     // 네이버 로그인 초기화
     if (window.naver) {
@@ -74,15 +85,9 @@ export default {
         clientId: '1SzX67SVz98SbWZaCDoK',
         callbackUrl: 'http://localhost:8080/naver/callback',
         isPopup: true,
-        loginButton: { color: 'green', type: 3, height: '40' },
+        loginButton: { color: 'green', type: 3, height: 48 },
       });
       naverLogin.init();
-      // 네이버 버튼 스타일 강제 설정
-      const naverButton = document.getElementById('naverIdLogin');
-      if (naverButton) {
-        naverButton.style.width = '300px';
-        naverButton.style.height = '40px';
-      }
     } else {
       console.error('네이버 SDK 로드 오류: 스크립트가 제대로 로드되지 않았습니다.');
     }
@@ -112,12 +117,6 @@ export default {
           console.error('Kakao 로그인 실패:', error);
         }
       });
-      // 카카오 버튼 스타일 강제 설정
-      const kakaoButton = document.getElementById('kakao-login-btn');
-      if (kakaoButton) {
-        kakaoButton.style.width = '300px';
-        kakaoButton.style.height = '40px';
-      }
     }
   },
   methods: {
@@ -212,21 +211,29 @@ button {
 }
 
 .sns-button {
-  width: 300px;
   margin-top: 10px;
-  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  width: 222px;
+  height: 49px;
 }
 
-.naver-button {
-  width: 300px;
-  height: 40px;
-  margin-top: 10px;
+.g_id_signin .nsm7Bb-HzV7m-LgbsSe-MJoBVe {
+  width: 222px !important;
+  height: 49px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-.kakao-button {
-  width: 300px;
-  height: 40px;
-  margin-top: 10px;
+
+
+.naver-button, .kakao-button {
+  width: auto;
+  height: auto;
 }
 
 .additional-options {
