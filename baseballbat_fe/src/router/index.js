@@ -29,6 +29,18 @@ const routes = [
     name: 'registerpage',
     component: () => import("../views/User/RegisterPage.vue")
   },
+  // ID 찾기 페이지
+  {
+    path: '/find-id',
+    name: 'findid',
+    component: () => import("../views/User/FindId.vue")
+  },
+  // ID 찾기 페이지
+  {
+    path: '/find-password',
+    name: 'findpassword',
+    component: () => import("../views/User/FindPassword.vue")
+  },
   // 마이페이지
   {
     path: '/mypage',
