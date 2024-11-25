@@ -10,9 +10,9 @@
       <div class="additional-options">
         <span @click="register" class="register-button option-text">회원가입</span>
         <span class="option-divider">|</span>
-        <span @click="findId" class="find-button option-text">아이디 찾기</span>
+        <span @click="handleFindId" class="find-button option-text">아이디 찾기</span>
         <span class="option-divider">|</span>
-        <span @click="findPassword" class="find-button option-text">비밀번호 찾기</span>
+        <span @click="handleFindPassword" class="find-button option-text">비밀번호 찾기</span>
       </div>
     </div>
 
@@ -69,15 +69,15 @@ export default {
       }
     );
 
-  // 렌더링된 내부 요소 크기 조정
-  setTimeout(() => {
-    const googleInnerDiv = document.querySelector('.nsm7Bb-HzV7m-LgbsSe-MJoBVe');
-    if (googleInnerDiv) {
-      googleInnerDiv.style.width = '222px';
-      googleInnerDiv.style.height = '49px';
-      googleInnerDiv.style.lineHeight = '49px'; // 텍스트 정렬
-    }
-  }, 500); // DOM이 생성된 후 실행
+    // 렌더링된 내부 요소 크기 조정
+    setTimeout(() => {
+      const googleInnerDiv = document.querySelector('.nsm7Bb-HzV7m-LgbsSe-MJoBVe');
+      if (googleInnerDiv) {
+        googleInnerDiv.style.width = '222px';
+        googleInnerDiv.style.height = '49px';
+        googleInnerDiv.style.lineHeight = '49px'; // 텍스트 정렬
+      }
+    }, 500); // DOM이 생성된 후 실행
 
     // 네이버 로그인 초기화
     if (window.naver) {
@@ -126,8 +126,24 @@ export default {
     register() {
       this.$router.push("/register");
     },
-    findId() {},
-    findPassword() {},
+    handleFindId() {
+      if (window.innerWidth > 768) {
+      // 화면 크기가 클 때 팝업으로 아이디 찾기
+      window.open('/find-id-popup', '아이디 찾기', 'width=500,height=600');
+    } else {
+      // 화면 크기가 작을 때 전체 페이지로 이동
+      this.$router.push('/find-id');
+    }
+    },
+    handleFindPassword() {
+      if (window.innerWidth > 768) {
+        // 화면 크기가 클 때 팝업으로 비밀번호 찾기
+        window.open('/find-password-popup', '비밀번호 찾기', 'width=500,height=600');
+      } else {
+        // 화면 크기가 작을 때 페이지 이동
+        this.$router.push('/find-password');
+      }
+    },
     signInWithGoogle() {
       window.google.accounts.id.prompt();
     },
@@ -228,8 +244,6 @@ button {
   justify-content: center;
   overflow: hidden;
 }
-
-
 
 .naver-button, .kakao-button {
   width: auto;

@@ -29,17 +29,41 @@ const routes = [
     name: 'registerpage',
     component: () => import("../views/User/RegisterPage.vue")
   },
+  // ID 찾기 공통 페이지
+  {
+    path: '/find-id-common',
+    name: 'findidcommon',
+    component: () => import("../views/User/FindId/FindIdCommon.vue")
+  },
   // ID 찾기 페이지
   {
     path: '/find-id',
     name: 'findid',
-    component: () => import("../views/User/FindId.vue")
+    component: () => import("../views/User/FindId/FindId.vue")
   },
-  // ID 찾기 페이지
+  // ID 찾기 팝업 페이지
+  {
+    path: '/find-id-popup',
+    name: 'findidpopup',
+    component: () => import("../views/User/FindId/FindIdPopup.vue")
+  },
+  // Password 찾기 공통 페이지
+  {
+    path: '/find-password-common',
+    name: 'findpasswordcommon',
+    component: () => import("../views/User/FindPassword/FindPasswordCommon.vue")
+  },
+  // Password 찾기 페이지
   {
     path: '/find-password',
     name: 'findpassword',
-    component: () => import("../views/User/FindPassword.vue")
+    component: () => import("../views/User/FindPassword/FindPassword.vue")
+  },
+  // Password 찾기 팝업 페이지
+  {
+    path: '/find-password-popup',
+    name: 'findpasswordpopup',
+    component: () => import("../views/User/FindPassword/FindPasswordPopup.vue")
   },
   // 마이페이지
   {
