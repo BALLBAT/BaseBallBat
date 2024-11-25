@@ -1,10 +1,10 @@
 <template>
   <div id="app">
-    <SiteHeader v-if="$route.path !== '/'" />
+    <SiteHeader v-if="$route.path !== '/' && !['/find-id', '/find-id-popup', '/find-password', '/find-password-popup'].includes($route.path)" />
     <div class="content-wrapper">
       <router-view />
     </div>
-    <footer class="site-footer">
+    <footer class="site-footer" v-if="!['/find-id', '/find-id-popup', '/find-password', '/find-password-popup'].includes($route.path)">
       <SiteFooter /> <!-- 푸터 추가 -->
     </footer>
   </div>
