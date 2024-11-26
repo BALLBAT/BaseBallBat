@@ -38,6 +38,8 @@
 </template>
 
 <script>
+import LoginService from "@/services/auth/LoginService";
+
 export default {
   data() {
     return {
@@ -120,8 +122,28 @@ export default {
     }
   },
   methods: {
-    login() {
-      console.log('일반 로그인 시도:', this.username);
+    async login() {
+      try {
+        console.log('일반 로그인 시도:', this.username);
+
+        // LoginService를 이용하여 로그인 요청을 보냅니다.
+        const loginReq = {
+          username: this.username,
+          password: this.password,
+        };
+
+        const { username, token } = await LoginService.login(loginReq);
+
+        // 토큰을 로컬 스토리지에 저장
+        localStorage.setItem('authToken', token);
+
+        console.log('로그인 성공:', username);
+        this.$router.push('/home'); // 로그인 성공 시 홈 화면으로 이동합니다.
+
+      } catch (error) {
+        console.error('로그인 오류:', error);
+        alert('로그인에 실패했습니다. 아이디와 비밀번호를 확인하세요.');
+      }
     },
     register() {
       this.$router.push("/register");
