@@ -76,6 +76,18 @@ public class UserController {
     }
 
     /**
+     * 이메일 중복 여부를 확인합니다.
+     * @param email 중복 확인할 이메일
+     * @return 중복 여부 (true: 사용 가능, false: 중복됨)
+     */
+    @GetMapping("/check-email/{email}")
+    public ResponseEntity<Boolean> checkEmailAvailability(@PathVariable("email") String email) {
+        boolean isAvailable = userService.isEmailAvailable(email);
+        return ResponseEntity.ok(isAvailable);
+    }
+
+
+    /**
      * 사용자 정보를 수정합니다.
      * @param userId 수정할 사용자의 ID
      * @param updatedUser 수정할 사용자 정보가 담긴 DTO

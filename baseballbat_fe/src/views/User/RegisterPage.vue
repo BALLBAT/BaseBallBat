@@ -39,16 +39,25 @@
         </div>
         <div class="form-group">
           <label>이메일 주소</label>
-          <div class="input-with-select">
-            <input type="text" v-model="email" placeholder="이메일 주소" />
-            <span>@</span>
-            <select v-model="emailDomain" @change="emailDomainInput = ''">
-              <option value="naver.com">naver.com</option>
-              <option value="gmail.com">gmail.com</option>
-              <option value="kakao.com">kakao.com</option>
-              <option value="">직접 입력</option>
-            </select>
-            <input v-if="emailDomain === ''" type="text" v-model="emailDomainInput" placeholder="직접 입력" />
+          <div class="input-with-select-and-button">
+            <div class="input-with-select">
+              <input type="text" v-model="email" placeholder="이메일 주소" />
+              <span>@</span>
+              <select v-model="emailDomain" @change="emailDomainInput = ''">
+                <option value="naver.com">naver.com</option>
+                <option value="gmail.com">gmail.com</option>
+                <option value="kakao.com">kakao.com</option>
+                <option value="">직접 입력</option>
+              </select>
+              <input v-if="emailDomain === ''" type="text" v-model="emailDomainInput" placeholder="직접 입력" />
+            </div>
+            <button type="button" class="check-button" @click="checkEmail">중복 확인</button>
+          </div>
+          <div v-if="isEmailAvailable === true" class="available-message">
+            사용 가능한 이메일입니다.
+          </div>
+          <div v-if="isEmailAvailable === false" class="unavailable-message">
+            이미 사용 중인 이메일입니다.
           </div>
         </div>
         <div class="form-group birthdate-group">
@@ -95,12 +104,23 @@ export default {
       birthMonth: '',
       birthDay: '',
       isUsernameAvailable: null,  // 아이디 사용 가능 여부 상태
+      isEmailAvailable: null,  // 이메일 사용 가능 여부 상태
     };
   },
   watch: {
     // 사용자가 아이디 입력 시 중복 확인 상태 초기화
     username() {
       this.isUsernameAvailable = null;
+    },
+    // 사용자가 이메일 입력 시 중복 확인 상태 초기화
+    email() {
+      this.isEmailAvailable = null;
+    },
+    emailDomain() {
+      this.isEmailAvailable = null;
+    },
+    emailDomainInput() {
+      this.isEmailAvailable = null;
     },
     // 사용자가 비밀번호 또는 비밀번호 확인을 입력할 때 비밀번호 불일치 상태 업데이트
     password() {
@@ -171,8 +191,31 @@ export default {
         }
       } catch (error) {
         console.log("어떤 에러인지 볼까~~~요" + error);
-        // alert('아이디 중복 확인에 실패했습니다. 다시 시도해주세요.');
         this.isUsernameAvailable = null;  // 실패 시 상태 초기화
+      }
+    },
+
+    // 이메일 중복 확인 버튼 클릭 시 호출되는 메서드
+    async checkEmail() {
+      if (!this.email) {
+        alert('이메일을 입력해주세요.');
+        return;
+      }
+
+      // 이메일과 이메일 도메인을 결합하여 완전한 이메일 주소를 생성
+      const fullEmail = `${this.email}@${this.emailDomain || this.emailDomainInput}`;
+
+      try {
+        const isAvailable = await UserService.checkEmailAvailability(fullEmail);
+        if (isAvailable) {
+          this.isEmailAvailable = true;
+        } else {
+          this.isEmailAvailable = false;
+        }
+      } catch (error) {
+        console.error('이메일 중복 확인 오류:', error);
+        alert('이메일 중복 확인에 실패했습니다. 다시 시도해주세요.');
+        this.isEmailAvailable = null;  // 실패 시 상태 초기화
       }
     },
 
@@ -195,6 +238,7 @@ export default {
       this.birthMonth = '';
       this.birthDay = '';
       this.isUsernameAvailable = null;
+      this.isEmailAvailable = null;
     },
 
     // 전화번호 유효성 검사 (예: 01012345678 형식)
@@ -248,6 +292,12 @@ p {
   width: 100%;
 }
 
+.input-with-select-and-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
 .form-group input {
   flex: 1;
   padding: 10px;
@@ -261,7 +311,7 @@ p {
 .input-with-select {
   display: flex;
   align-items: center;
-  width: 100%;
+  flex: 1;
 }
 
 .input-with-select input {
@@ -343,6 +393,11 @@ p {
   }
 
   .input-with-button {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .input-with-select-and-button {
     flex-direction: column;
     align-items: stretch;
   }
