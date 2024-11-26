@@ -45,6 +45,17 @@ class UserService {
     }
     }
 
+  // 이메일 중복 확인
+  async checkEmailAvailability(email) {
+    try {
+      const response = await http.get(`/user/check-email/${email}`);
+      return response.data; // true면 사용 가능, false면 사용 불가
+    } catch (error) {
+      console.error('이메일 중복 확인 오류:', error);
+      throw error;
+    }
+  }
+
   // 사용자 정보 수정
   async updateUser(userId, updatedUserReq) {
     try {

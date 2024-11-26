@@ -6,11 +6,11 @@ import com.baseballproject.baseballbat_be.model.entity.auth.User;
 import com.baseballproject.baseballbat_be.repository.user.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -38,7 +38,20 @@ public class UserService {
     private EntityManager entityManager;
 
     /**
-     * 새로운 사용자를 등록합니다. 이메일 중복 여부를 확인합니다.
+     * 이메일 중복 여부를 확인합니다.
+     * @param email 등록할 사용자 이메일
+     * @return 중복 여부 (true: 중복 아님, false: 중복)
+     */
+    @Transactional(readOnly = true)
+    public boolean isEmailAvailable(String email) {
+        log.debug("Checking if email is available: {}", email);
+        entityManager.flush();  // 영속성 컨텍스트를 최신화하여 중복 체크 시 최신 상태 보장
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        return existingUser.isEmpty();
+    }
+
+    /**
+     * 새로운 사용자를 등록합니다.
      * @param req 등록할 사용자 정보가 담긴 DTO
      * @return 등록된 사용자 정보가 담긴 DTO
      */
@@ -47,9 +60,7 @@ public class UserService {
         log.debug("Attempting to register user with email: {}", req.getEmail());
 
         // 이메일 중복 체크
-        entityManager.flush();  // 영속성 컨텍스트를 최신화하여 중복 체크 시 최신 상태 보장
-        Optional<User> existingUser = userRepository.findByEmail(req.getEmail());
-        if (existingUser.isPresent()) {
+        if (!isEmailAvailable(req.getEmail())) {
             log.error("Email already registered: {}", req.getEmail());
             throw new IllegalArgumentException("Email is already registered.");
         }
@@ -60,6 +71,7 @@ public class UserService {
 
         return modelMapper.map(savedUser, UserRes.class);
     }
+
 
     /**
      * 사용자명을 통해 사용자를 찾습니다.
