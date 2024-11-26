@@ -4,6 +4,8 @@ import com.baseballproject.baseballbat_be.model.dto.auth.UserReq;
 import com.baseballproject.baseballbat_be.model.dto.auth.UserRes;
 import com.baseballproject.baseballbat_be.model.entity.auth.User;
 import com.baseballproject.baseballbat_be.repository.user.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     /**
      * 새로운 사용자를 등록합니다. 이메일 중복 여부를 확인합니다.
      * @param req 등록할 사용자 정보가 담긴 DTO
@@ -39,12 +44,20 @@ public class UserService {
      */
     @Transactional
     public UserRes registerUser(UserReq req) {
+        log.debug("Attempting to register user with email: {}", req.getEmail());
+
         // 이메일 중복 체크
-        if (userRepository.findByEmail(req.getEmail()) != null) {
-            throw new RuntimeException("이미 사용 중인 이메일입니다.");
+        entityManager.flush();  // 영속성 컨텍스트를 최신화하여 중복 체크 시 최신 상태 보장
+        Optional<User> existingUser = userRepository.findByEmail(req.getEmail());
+        if (existingUser.isPresent()) {
+            log.error("Email already registered: {}", req.getEmail());
+            throw new IllegalArgumentException("Email is already registered.");
         }
+
         User user = modelMapper.map(req, User.class);
         User savedUser = userRepository.save(user);
+        log.debug("User registered successfully with ID: {}", savedUser.getUserId());
+
         return modelMapper.map(savedUser, UserRes.class);
     }
 

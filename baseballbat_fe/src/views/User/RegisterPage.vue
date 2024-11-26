@@ -31,7 +31,7 @@
         </div>
         <div class="form-group">
           <label>이름</label>
-          <input type="text" v-model="name" placeholder="이름을 입력해주세요" />
+          <input type="text" v-model="realname" placeholder="이름을 입력해주세요" />
         </div>
         <div class="form-group">
           <label>전화번호</label>
@@ -42,11 +42,13 @@
           <div class="input-with-select">
             <input type="text" v-model="email" placeholder="이메일 주소" />
             <span>@</span>
-            <select v-model="emailDomain">
+            <select v-model="emailDomain" @change="emailDomainInput = ''">
               <option value="naver.com">naver.com</option>
               <option value="gmail.com">gmail.com</option>
               <option value="kakao.com">kakao.com</option>
+              <option value="">직접 입력</option>
             </select>
+            <input v-if="emailDomain === ''" type="text" v-model="emailDomainInput" placeholder="직접 입력" />
           </div>
         </div>
         <div class="form-group birthdate-group">
@@ -84,10 +86,11 @@ export default {
       username: '',
       password: '',
       confirmPassword: '',
-      name: '',
+      realname: '',
       phoneNumber: '',
       email: '',
-      emailDomain: '',
+      emailDomain: 'naver.com', // 기본 이메일 도메인 설정
+      emailDomainInput: '', // 사용자가 직접 입력할 이메일 도메인
       birthYear: '',
       birthMonth: '',
       birthDay: '',
@@ -121,19 +124,18 @@ export default {
       }
 
       // 이메일과 이메일 도메인을 결합하여 완전한 이메일 주소를 생성
-      const fullEmail = `${this.email}@${this.emailDomain}`;
+      const fullEmail = `${this.email}@${this.emailDomain || this.emailDomainInput}`;
 
-// 생년월일 형식 생성 (예: 1990-12-31)
-const birthMonthPadded = String(this.birthMonth).padStart(2, '0');
-const birthDayPadded = String(this.birthDay).padStart(2, '0');
-const birthdate = `${this.birthYear}-${birthMonthPadded}-${birthDayPadded}`;
-
+      // 생년월일 형식 생성 (예: 1990-12-31)
+      const birthMonthPadded = String(this.birthMonth).padStart(2, '0');
+      const birthDayPadded = String(this.birthDay).padStart(2, '0');
+      const birthdate = `${this.birthYear}-${birthMonthPadded}-${birthDayPadded}`;
 
       // 회원가입 요청에 필요한 데이터 구성
       const user = {
         username: this.username,
         password: this.password,
-        name: this.name,
+        realname: this.realname,
         phoneNumber: this.phoneNumber,
         email: fullEmail,
         birthdate: birthdate,
@@ -149,6 +151,7 @@ const birthdate = `${this.birthYear}-${birthMonthPadded}-${birthDayPadded}`;
       } catch (error) {
         alert('회원가입에 실패했습니다. 다시 시도해주세요.');
         console.error('회원가입 오류:', error);
+        console.log("어떤 오류가 있을까요 :::?" + error)
       }
     },
 
@@ -183,10 +186,11 @@ const birthdate = `${this.birthYear}-${birthMonthPadded}-${birthDayPadded}`;
       this.username = '';
       this.password = '';
       this.confirmPassword = '';
-      this.name = '';
+      this.realname = '';
       this.phoneNumber = '';
       this.email = '';
-      this.emailDomain = '';
+      this.emailDomain = 'naver.com';
+      this.emailDomainInput = '';
       this.birthYear = '';
       this.birthMonth = '';
       this.birthDay = '';
