@@ -124,7 +124,7 @@ export default {
   methods: {
     async login() {
       try {
-        console.log('일반 로그인 시도:', this.username);
+        console.log('일반 로그인 시도:', this.username, "비밀번호는?", this.password);
 
         // LoginService를 이용하여 로그인 요청을 보냅니다.
         const loginReq = {
@@ -138,7 +138,7 @@ export default {
         localStorage.setItem('authToken', token);
 
         console.log('로그인 성공:', username);
-        this.$router.push('/home'); // 로그인 성공 시 홈 화면으로 이동합니다.
+        this.$router.push('/main'); // 로그인 성공 시 홈 화면으로 이동합니다.
 
       } catch (error) {
         console.error('로그인 오류:', error);
