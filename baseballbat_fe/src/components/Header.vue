@@ -31,16 +31,18 @@
               <router-link class="nav-link" to="/trade">중고거래</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/restaurant" >맛집 정보</router-link>
+              <router-link class="nav-link" to="/restaurant">맛집 정보</router-link>
             </li>
             <li class="nav-item">
               <router-link class="nav-link" to="/teaminfo">구장 정보</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/mypage" >마이 페이지</router-link>
+              <router-link class="nav-link" to="/mypage">마이 페이지</router-link>
             </li>
             <li class="nav-item">
-              <button class="btn btn-success" @click="login">로그인</button>
+              <!-- 로그인 상태에 따른 버튼 변경 -->
+              <button v-if="!isLoggedIn" class="btn btn-success" @click="login">로그인</button>
+              <button v-else class="btn btn-danger" @click="logout">로그아웃</button>
             </li>
           </ul>
         </div>
@@ -52,13 +54,27 @@
 <script>
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import { mapGetters } from 'vuex';
 
 export default {
   name: "SiteHeader",
+  computed: {
+    ...mapGetters(['isLoggedIn']), // Vuex의 isLoggedIn getter를 사용하여 로그인 상태를 가져옵니다.
+  },
   methods: {
     // 로그인 버튼 클릭시 로그인 페이지 이동
     login() {
       this.$router.push('/login');
+    },
+    // 로그아웃 버튼 클릭시 로그아웃 처리
+    logout() {
+      // 로그아웃 상태를 Vuex store를 통해 반영
+      this.$store.dispatch('logout');
+      
+      // 로그아웃 후 로그인 페이지로 이동
+      setTimeout(() => {
+        this.$router.push('/login');
+      }, 100);
     },
   },
 };
@@ -118,6 +134,10 @@ export default {
 }
 
 .btn-success {
+  padding: 5px 15px;
+}
+
+.btn-danger {
   padding: 5px 15px;
 }
 

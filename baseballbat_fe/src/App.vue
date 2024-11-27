@@ -14,13 +14,24 @@
 import SiteHeader from './components/Header.vue'; // 헤더 컴포넌트 임포트
 import SiteFooter from './components/Footer.vue'; // 푸터 컴포넌트 임포트
 
+import LoginService from './services/auth/LoginService'; // 로그인 상태 확인
+
 export default {
   name: 'App',
   components: {
     SiteHeader, // 헤더 컴포넌트를 사용할 수 있도록 설정
     SiteFooter, // 푸터 컴포넌트를 사용할 수 있도록 설정
   },
-  created() { console.log('App component created'); }
+  created() {
+    console.log('App component created');
+    
+    // App이 처음 시작될 때 로그인 상태를 체크합니다.
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      // 로그인 서비스에서 로그인 상태를 유지합니다.
+      LoginService.setAuthToken(token);
+    }
+    }
 };
 </script>
 
