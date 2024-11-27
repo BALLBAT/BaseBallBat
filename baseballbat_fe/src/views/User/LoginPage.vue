@@ -39,6 +39,7 @@
 
 <script>
 import LoginService from "@/services/auth/LoginService";
+import { mapActions } from 'vuex';
 
 export default {
   data() {
@@ -48,6 +49,13 @@ export default {
     };
   },
   mounted() {
+    // 로그인 상태 확인
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      // 이미 로그인된 경우 메인 페이지로 이동
+      this.$router.push('/main');
+    }
+
     // Google Identity Services 스크립트가 로드된 후 호출되는 콜백
     window.handleCredentialResponse = (response) => {
       console.log('Encoded JWT ID token: ' + response.credential);
@@ -122,28 +130,30 @@ export default {
     }
   },
   methods: {
-    async login() {
-      try {
-        console.log('일반 로그인 시도:', this.username, "비밀번호는?", this.password);
+    ...mapActions(['login']), // Vuex에서 login 액션 사용
 
-        // LoginService를 이용하여 로그인 요청을 보냅니다.
-        const loginReq = {
-          username: this.username,
-          password: this.password,
-        };
+  async login() {
+    try {
+      console.log('일반 로그인 시도:', this.username, "비밀번호는?", this.password);
 
-        const { username, token } = await LoginService.login(loginReq);
+      // LoginService를 이용하여 로그인 요청을 보냅니다.
+      const loginReq = {
+        username: this.username,
+        password: this.password,
+      };
 
-        // 토큰을 로컬 스토리지에 저장
-        localStorage.setItem('authToken', token);
+      const { username, token } = await LoginService.login(loginReq);
 
-        console.log('로그인 성공:', username);
-        this.$router.push('/main'); // 로그인 성공 시 홈 화면으로 이동합니다.
+      // Vuex store에 로그인 상태 업데이트
+      this.$store.dispatch('login', { username, token });
 
-      } catch (error) {
-        console.error('로그인 오류:', error);
-        alert('로그인에 실패했습니다. 아이디와 비밀번호를 확인하세요.');
-      }
+      console.log('로그인 성공:', username);
+      this.$router.push('/main'); // 로그인 성공 시 메인 화면으로 이동합니다.
+
+    } catch (error) {
+      console.error('로그인 오류:', error);
+      alert('로그인에 실패했습니다. 아이디와 비밀번호를 확인하세요.');
+    }
     },
     register() {
       this.$router.push("/register");
