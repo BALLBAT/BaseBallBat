@@ -48,6 +48,11 @@ public class LoginService {
         }
 
         User user = optionalUser.get();
+
+        // 입력된 비밀번호와 저장된 비밀번호를 비교하기 전에 로그 출력
+        log.debug("입력된 비밀번호: " + loginReq.getPassword());
+        log.debug("DB에 저장된 비밀번호 (인코딩된 형태): " + user.getPassword());
+
         // 입력된 비밀번호와 저장된 비밀번호를 비교합니다.
         if (!passwordEncoder.matches(loginReq.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");

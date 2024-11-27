@@ -9,6 +9,7 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -66,6 +68,10 @@ public class UserService {
         }
 
         User user = modelMapper.map(req, User.class);
+
+        // 비밀번호 인코딩
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
+
         User savedUser = userRepository.save(user);
         log.debug("User registered successfully with ID: {}", savedUser.getUserId());
 
