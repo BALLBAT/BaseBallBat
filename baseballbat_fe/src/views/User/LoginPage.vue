@@ -93,7 +93,7 @@ export default {
     if (window.naver) {
       const naverLogin = new window.naver.LoginWithNaverId({
         clientId: '1SzX67SVz98SbWZaCDoK',
-        callbackUrl: 'http://localhost:8080/naver/callback',
+        callbackUrl: 'http://localhost:8080/api/naver/callback',
         isPopup: true,
         loginButton: { color: 'green', type: 3, height: 48 },
       });
@@ -176,6 +176,29 @@ export default {
         this.$router.push('/find-password');
       }
     },
+    // 네이버 로그인
+      async handleNaverLogin() {
+    try {
+      // 네이버 로그인 팝업을 띄우고 로그인이 완료되면 백엔드로 리디렉션됩니다.
+      const naverLogin = new window.naver.LoginWithNaverId({
+        clientId: '1SzX67SVz98SbWZaCDoK',
+        callbackUrl: 'http://localhost:8080/api/naver/callback',
+        isPopup: true,
+        loginButton: { color: 'green', type: 3, height: 48 },
+      });
+      naverLogin.init();
+      naverLogin.getLoginStatus((status) => {
+        if (status) {
+          console.log('네이버 로그인 성공:', naverLogin.user);
+          // 네이버 사용자 정보를 저장할 수도 있습니다.
+        } else {
+          console.error('네이버 로그인 실패');
+        }
+      });
+    } catch (error) {
+      console.error('네이버 로그인 처리 중 오류 발생:', error);
+    }
+  },
     signInWithGoogle() {
       window.google.accounts.id.prompt();
     },
