@@ -31,6 +31,17 @@ class LoginService {
       delete http.defaults.headers.common['Authorization'];
     }
   }
+
+    // 네이버 콜백으로 받은 인증 코드로 서버에 로그인 요청
+    async naverLoginCallback({ code, state }) {
+      try {
+        const response = await http.get(`/naver/callback?code=${code}&state=${state}`);
+        return response;
+      } catch (error) {
+        console.error('네이버 로그인 요청 오류:', error);
+        throw error;
+      }
+    }
 }
 
 export default new LoginService();

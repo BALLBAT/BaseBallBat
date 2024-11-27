@@ -23,6 +23,12 @@ const routes = [
     name: 'loginpage',
     component: () => import("../views/User/LoginPage.vue")
   },
+  // 네이버 콜백 페이지
+  {
+    path: '/naver/callback',
+    name: 'NaverCallback',
+    component: () => import("../views/User/CallBack/NaverCallBack.vue")
+  },
   // 회원가입 페이지
   {
     path: '/register',

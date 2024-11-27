@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import LoginService from '@/services/auth/LoginService';
+import axios from 'axios';
 
 export default {
   name: 'NaverCallback',
@@ -15,11 +15,16 @@ export default {
 
     if (code) {
       try {
-        // 네이버 로그인 요청을 서버로 전달
-        const response = await LoginService.naverLoginCallback({ code, state });
-        
-        // 성공적으로 로그인한 경우 토큰을 저장하고 메인 페이지로 이동
-        const { token, username } = response.data;
+        // 네이버 로그인 인증 코드를 백엔드 서버로 전달하여 처리합니다.
+        const response = await axios.get('http://localhost:8000/api/naver/callback', {
+          params: {
+            code: code,
+            state: state
+          }
+        });
+
+        // 백엔드에서 JWT 토큰을 발급받아 저장하고, 메인 페이지로 이동합니다.
+        const token = response.data;
         localStorage.setItem('authToken', token);
         this.$router.push('/main');
       } catch (error) {
