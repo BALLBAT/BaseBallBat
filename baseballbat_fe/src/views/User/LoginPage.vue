@@ -18,13 +18,11 @@
 
     <div class="login-section right-section">
       <h3>SNS 계정으로 로그인하기</h3>
-      <div id="naverIdLogin" class="sns-button naver-button"></div>
+      <!-- 네이버 로그인 버튼 -->
+      <button class="sns-button naver-button" @click="handleNaverLogin">네이버 로그인</button>
+      <!-- 카카오 로그인 버튼 -->
       <div id="kakao-login-btn" class="sns-button kakao-button"></div>
-      <div id="g_id_onload"
-           data-client_id="69828466810-cho87reh7vfoke4ef242tr6g610bsupj.apps.googleusercontent.com"
-           data-callback="handleCredentialResponse"
-           data-auto_select="false">
-      </div>
+      <!-- 구글 로그인 버튼 -->
       <div class="g_id_signin sns-button google-signin"
            data-type="standard"
            data-shape="rectangular"
@@ -39,189 +37,181 @@
 
 <script>
 import LoginService from "@/services/auth/LoginService";
-import { mapActions } from 'vuex';
+import { mapActions } from "vuex";
+import axios from "axios";
 
 export default {
   data() {
     return {
-      username: '',
-      password: '',
+      username: "",
+      password: "",
     };
   },
   mounted() {
     // 로그인 상태 확인
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     if (token) {
       // 이미 로그인된 경우 메인 페이지로 이동
-      this.$router.push('/main');
+      this.$router.push("/main");
     }
 
-    // Google Identity Services 스크립트가 로드된 후 호출되는 콜백
+    // URL에서 네이버 로그인 결과 확인
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+    const state = urlParams.get("state");
+
+    if (code && state) {
+      this.handleNaverCallback(code, state);
+    }
+
+    // Google Identity Services 초기화
     window.handleCredentialResponse = (response) => {
-      console.log('Encoded JWT ID token: ' + response.credential);
+      console.log("Encoded JWT ID token: " + response.credential);
       this.verifyWithBackend(response.credential);
     };
 
-    // Google 계정 ID 초기화
     window.google.accounts.id.initialize({
-      client_id: '69828466810-cho87reh7vfoke4ef242tr6g610bsupj.apps.googleusercontent.com',
+      client_id: "69828466810-cho87reh7vfoke4ef242tr6g610bsupj.apps.googleusercontent.com",
       callback: this.handleCredentialResponse,
     });
 
-    // Google 로그인 버튼을 렌더링
     window.google.accounts.id.renderButton(
-      document.querySelector('.g_id_signin'),
+      document.querySelector(".g_id_signin"),
       {
-        theme: 'outline',
-        size: 'large',
-        width: 222, // 원하는 너비 설정
-        height: 49
+        theme: "outline",
+        size: "large",
+        width: 222,
+        height: 49,
       }
     );
 
-    // 렌더링된 내부 요소 크기 조정
-    setTimeout(() => {
-      const googleInnerDiv = document.querySelector('.nsm7Bb-HzV7m-LgbsSe-MJoBVe');
-      if (googleInnerDiv) {
-        googleInnerDiv.style.width = '222px';
-        googleInnerDiv.style.height = '49px';
-        googleInnerDiv.style.lineHeight = '49px'; // 텍스트 정렬
-      }
-    }, 500); // DOM이 생성된 후 실행
-
-    // 네이버 로그인 초기화
-    if (window.naver) {
-      const naverLogin = new window.naver.LoginWithNaverId({
-        clientId: '1SzX67SVz98SbWZaCDoK',
-        callbackUrl: 'http://localhost:8080/api/naver/callback',
-        isPopup: true,
-        loginButton: { color: 'green', type: 3, height: 48 },
-      });
-      naverLogin.init();
-    } else {
-      console.error('네이버 SDK 로드 오류: 스크립트가 제대로 로드되지 않았습니다.');
-    }
-
     // 카카오 JavaScript SDK 초기화
     if (window.Kakao && !window.Kakao.isInitialized()) {
-      window.Kakao.init('fd27adca5c2fbcb6e74f4786ebe260bb');
+      window.Kakao.init("fd27adca5c2fbcb6e74f4786ebe260bb");
     }
 
-    // 카카오 로그인 버튼 렌더링
     if (window.Kakao) {
       window.Kakao.Auth.createLoginButton({
-        container: '#kakao-login-btn',
+        container: "#kakao-login-btn",
         success: (authObj) => {
-          console.log('Kakao 로그인 성공:', authObj);
+          console.log("Kakao 로그인 성공:", authObj);
           window.Kakao.API.request({
-            url: '/v2/user/me',
+            url: "/v2/user/me",
             success: (response) => {
-              console.log('사용자 정보:', response);
+              console.log("사용자 정보:", response);
             },
             fail: (error) => {
-              console.error('사용자 정보 요청 실패:', error);
-            }
+              console.error("사용자 정보 요청 실패:", error);
+            },
           });
         },
         fail: (error) => {
-          console.error('Kakao 로그인 실패:', error);
-        }
+          console.error("Kakao 로그인 실패:", error);
+        },
       });
     }
   },
   methods: {
-    ...mapActions(['login']), // Vuex에서 login 액션 사용
+    ...mapActions(["login"]),
 
-  async login() {
-    try {
-      console.log('일반 로그인 시도:', this.username, "비밀번호는?", this.password);
+    async login() {
+      try {
+        console.log("일반 로그인 시도:", this.username, "비밀번호는?", this.password);
 
-      // LoginService를 이용하여 로그인 요청을 보냅니다.
-      const loginReq = {
-        username: this.username,
-        password: this.password,
-      };
+        // LoginService를 이용하여 로그인 요청
+        const loginReq = {
+          username: this.username,
+          password: this.password,
+        };
 
-      const { username, token } = await LoginService.login(loginReq);
+        const { username, token } = await LoginService.login(loginReq);
 
-      // Vuex store에 로그인 상태 업데이트
-      this.$store.dispatch('login', { username, token });
+        // Vuex store에 로그인 상태 업데이트
+        this.$store.dispatch("login", { username, token });
 
-      console.log('로그인 성공:', username);
-      this.$router.push('/main'); // 로그인 성공 시 메인 화면으로 이동합니다.
-
-    } catch (error) {
-      console.error('로그인 오류:', error);
-      alert('로그인에 실패했습니다. 아이디와 비밀번호를 확인하세요.');
-    }
+        console.log("로그인 성공:", username);
+        this.$router.push("/main"); // 로그인 성공 시 메인 화면으로 이동
+      } catch (error) {
+        console.error("로그인 오류:", error);
+        alert("로그인에 실패했습니다. 아이디와 비밀번호를 확인하세요.");
+      }
     },
+
     register() {
       this.$router.push("/register");
     },
+
     handleFindId() {
       if (window.innerWidth > 768) {
-      // 화면 크기가 클 때 팝업으로 아이디 찾기
-      window.open('/find-id-popup', '아이디 찾기', 'width=500,height=600');
-    } else {
-      // 화면 크기가 작을 때 전체 페이지로 이동
-      this.$router.push('/find-id');
-    }
-    },
-    handleFindPassword() {
-      if (window.innerWidth > 768) {
-        // 화면 크기가 클 때 팝업으로 비밀번호 찾기
-        window.open('/find-password-popup', '비밀번호 찾기', 'width=500,height=600');
+        window.open("/find-id-popup", "아이디 찾기", "width=500,height=600");
       } else {
-        // 화면 크기가 작을 때 페이지 이동
-        this.$router.push('/find-password');
+        this.$router.push("/find-id");
       }
     },
-    // 네이버 로그인
-      async handleNaverLogin() {
-    try {
-      // 네이버 로그인 팝업을 띄우고 로그인이 완료되면 백엔드로 리디렉션됩니다.
-      const naverLogin = new window.naver.LoginWithNaverId({
-        clientId: '1SzX67SVz98SbWZaCDoK',
-        callbackUrl: 'http://localhost:8080/api/naver/callback',
-        isPopup: true,
-        loginButton: { color: 'green', type: 3, height: 48 },
-      });
-      naverLogin.init();
-      naverLogin.getLoginStatus((status) => {
-        if (status) {
-          console.log('네이버 로그인 성공:', naverLogin.user);
-          // 네이버 사용자 정보를 저장할 수도 있습니다.
-        } else {
-          console.error('네이버 로그인 실패');
-        }
-      });
-    } catch (error) {
-      console.error('네이버 로그인 처리 중 오류 발생:', error);
-    }
-  },
+
+    handleFindPassword() {
+      if (window.innerWidth > 768) {
+        window.open("/find-password-popup", "비밀번호 찾기", "width=500,height=600");
+      } else {
+        this.$router.push("/find-password");
+      }
+    },
+
+    // 네이버 로그인 버튼 클릭
+    handleNaverLogin() {
+      const clientId = "1SzX67SVz98SbWZaCDoK"; // 네이버 클라이언트 ID
+      const redirectUri = encodeURIComponent("http://localhost:8000/api/naver/callback");
+      const state = "randomStateValue"; // CSRF 방지를 위한 상태 값
+      const naverLoginUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+      window.location.href = naverLoginUrl;
+    },
+
+    // 네이버 로그인 콜백 처리
+    async handleNaverCallback(code, state) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/naver/callback?code=${code}&state=${state}`
+        );
+
+        const { token } = response.data;
+
+        // JWT 저장
+        localStorage.setItem("jwt", token);
+        alert("로그인 성공!");
+
+        // 메인 페이지로 이동
+        this.$router.push("/main");
+      } catch (error) {
+        console.error("네이버 로그인 처리 중 오류 발생:", error);
+        alert("로그인 처리에 실패했습니다.");
+      }
+    },
+
     signInWithGoogle() {
       window.google.accounts.id.prompt();
     },
+
     verifyWithBackend(idToken) {
-      fetch('http://localhost:8080/api/google-login', {
-        method: 'POST',
+      fetch("http://localhost:8000/api/google-login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ idToken }),
       })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Server Response:', data);
-        this.$router.push('/home');
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-    }
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Server Response:", data);
+          this.$router.push("/home");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    },
   },
 };
 </script>
+
 
 <style scoped>
 .login-container {
@@ -303,6 +293,21 @@ button {
 .naver-button, .kakao-button {
   width: auto;
   height: auto;
+}
+
+.naver-button {
+  background-color: #03c75a; /* 네이버의 대표 색상 */
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 10px 20px;
+  text-align: center;
+}
+
+.naver-button:hover {
+  background-color: #029b49; /* 호버 시 더 어두운 색상 */
 }
 
 .additional-options {
