@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * packageName : com.baseballproject.baseballbat_be.security.contoller
  * fileName : NaverController
@@ -30,22 +33,44 @@ public class NaverController {
     private final SocialLoginService socialLoginService;
 
     /**
-     * 네이버 로그인 콜백을 처리합니다.
-     * 네이버로부터 인증 코드를 받고, 이를 사용해 액세스 토큰 및 사용자 정보를 조회합니다.
+     * 네이버 로그인 콜백 처리
      * @param code 네이버로부터 받은 인증 코드
-     * @param state 네이버로부터 받은 상태값 (CSRF 방지용)
+     * @param state 네이버로부터 받은 상태값
      * @return JWT 토큰
      */
     @GetMapping("/callback")
-    public ResponseEntity<?> naverCallback(@RequestParam String code, @RequestParam String state) {
+    public ResponseEntity<?> naverCallback(
+            @RequestParam(name = "code") String code,
+            @RequestParam(name = "state") String state) {
         log.info("Received code: {}, state: {}", code, state);
+
         try {
             // 소셜 로그인 서비스 호출
             String jwtToken = socialLoginService.naverLogin(code, state);
-            return ResponseEntity.ok(jwtToken);
+
+            // 추가 정보 입력 필요 여부 확인
+            boolean needsAdditionalInfo = socialLoginService.needsAdditionalInfo(jwtToken);
+
+            // 성공 응답 데이터 구성
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "네이버 로그인에 성공하였습니다.");
+            response.put("token", jwtToken);
+            response.put("needsAdditionalInfo", needsAdditionalInfo);
+
+            log.info("Naver login successful: {}", response);
+            return ResponseEntity.ok(response);
+
         } catch (Exception e) {
             log.error("Error during Naver login: ", e);
-            return ResponseEntity.status(500).body("네이버 로그인에 실패하였습니다.");
+
+            // 에러 응답 데이터 구성
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "네이버 로그인에 실패하였습니다.");
+            errorResponse.put("details", e.getMessage());
+
+            return ResponseEntity.status(500).body(errorResponse);
         }
     }
 }
