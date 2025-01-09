@@ -23,6 +23,12 @@ const routes = [
     name: 'loginpage',
     component: () => import("../views/User/LoginPage.vue")
   },
+  // 추가 정보 입력 페이지
+  {
+    path: '/additional-info',
+    name: 'additionalinfopage',
+    component: () => import("../views/User/AddInfo.vue")
+  },
   // 네이버 콜백 페이지
   {
     path: '/naver/callback',

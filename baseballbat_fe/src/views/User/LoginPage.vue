@@ -167,25 +167,43 @@ export default {
     },
 
     // 네이버 로그인 콜백 처리
-    async handleNaverCallback(code, state) {
-      try {
+async handleNaverCallback(code, state) {
+    try {
         const response = await axios.get(
-          `http://localhost:8000/api/naver/callback?code=${code}&state=${state}`
+            `http://localhost:8000/api/naver/callback?code=${code}&state=${state}`
         );
 
-        const { token } = response.data;
+        const { token, needsAdditionalInfo, email, socialId, provider } = response.data;
 
-        // JWT 저장
-        localStorage.setItem("jwt", token);
-        alert("로그인 성공!");
-
-        // 메인 페이지로 이동
-        this.$router.push("/main");
-      } catch (error) {
+        if (needsAdditionalInfo) {
+            // 추가 정보 입력 페이지로 이동
+            this.$router.push({
+                name: 'additionalInfo',
+                query: { email, socialId, provider }
+            });
+        } else {
+            // JWT 저장
+            localStorage.setItem("jwt", token);
+            alert("로그인 성공!");
+            this.$router.push("/main");
+        }
+    } catch (error) {
         console.error("네이버 로그인 처리 중 오류 발생:", error);
         alert("로그인 처리에 실패했습니다.");
-      }
-    },
+    }
+},
+
+async saveAdditionalInfo(data) {
+    try {
+        const response = await axios.post("http://localhost:8000/api/user/additional-info", data);
+        console.log("추가 정보 저장 응답:", response); // 로그 출력
+        alert("추가 정보 저장 성공!");
+        this.$router.push("/main");
+    } catch (error) {
+        console.error("추가 정보 저장 실패:", error);
+        alert("추가 정보를 저장하는 중 문제가 발생했습니다.");
+    }
+},
 
     signInWithGoogle() {
       window.google.accounts.id.prompt();
