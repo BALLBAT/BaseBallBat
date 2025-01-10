@@ -26,10 +26,48 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
+  data() {
+    return {
+      isLoggedIn: false,
+      userName: "",
+    };
+  },
+  mounted() {
+    const token = localStorage.getItem("jwt");
+    if (!token) {
+      this.isLoggedIn = false;
+      return;
+    }
+
+    // JWT 검증 및 사용자 정보 가져오기
+    this.validateToken(token);
+  },
   methods: {
     navigateTo(route) {
       this.$router.push(`/${route}`);
+    },
+        async validateToken(token) {
+      try {
+        const response = await axios.get("http://localhost:8000/api/auth/validate", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.isLoggedIn = true;
+        this.userName = response.data.realName; // 사용자 이름을 설정
+      } catch (error) {
+        console.error("JWT 검증 실패:", error);
+        this.isLoggedIn = false;
+        localStorage.removeItem("jwt");
+        this.$router.push("/login");
+      }
+    },
+    logout() {
+      localStorage.removeItem("jwt");
+      this.isLoggedIn = false;
+      alert("로그아웃되었습니다.");
+      this.$router.push("/login");
     },
   },
 };

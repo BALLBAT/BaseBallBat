@@ -39,5 +39,5 @@ public interface UserRepository extends JpaRepository <User, Long> {
     @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END FROM TB_USER WHERE EMAIL = :email", nativeQuery = true)
     boolean existsByEmail(@Param("email") String email);
 
-
+    boolean existsByUsername(String username); // USERNAME 중복 체크
 }

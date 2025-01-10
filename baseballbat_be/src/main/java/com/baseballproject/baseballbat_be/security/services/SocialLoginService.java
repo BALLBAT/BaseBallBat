@@ -59,16 +59,83 @@ public class SocialLoginService {
 
             if (optionalSocialUser.isPresent()) {
                 log.debug("Social account already linked for email={}", email);
-                return generateJwtToken(user, provider);
+
+                // JWT 토큰 발급
+                String jwtToken = generateJwtToken(user, provider);
+                log.debug("Generated JWT Token for existing user: {}", jwtToken);
+
+                return jwtToken;
             } else {
                 log.warn("Social account not linked for email={}", email);
-                throw new AdditionalInfoRequiredException(email, socialId, provider);
+                linkSocialAccount(user, socialId, provider, realName);
+
+                // JWT 토큰 발급
+                String jwtToken = generateJwtToken(user, provider);
+                log.debug("Generated JWT Token after linking social account: {}", jwtToken);
+
+                return jwtToken;
             }
         }
 
         // 3. 신규 사용자 처리
-        log.warn("No user found for email={}, additional info required.", email);
-        throw new AdditionalInfoRequiredException(email, socialId, provider);
+        log.warn("No user found for email={}, creating new user.", email);
+        String jwtToken = createUserWithSocialAccount(email, realName, socialId, provider);
+
+        log.debug("Generated JWT Token for new user: {}", jwtToken);
+
+        return jwtToken;
+    }
+
+    /**
+     * 새로운 사용자 생성 및 소셜 계정 연동
+     *
+     * @param email    이메일
+     * @param realName 실명
+     * @param socialId 소셜 계정 ID
+     * @param provider 소셜 제공자
+     * @return 생성된 사용자의 JWT 토큰
+     */
+    private String createUserWithSocialAccount(String email, String realName, String socialId, String provider) {
+        log.info("Creating new user with social account: email={}, provider={}", email, provider);
+
+        // USERNAME 자동 생성 로직
+        String generatedUsername = generateUniqueUsername(email);
+
+        User user = new User();
+        user.setEmail(email);
+        user.setRealname(realName);
+        user.setUsername(generatedUsername); // 자동 생성된 USERNAME 사용
+        user.setPassword("SOCIAL_LOGIN"); // 소셜 로그인 기본 비밀번호 설정
+
+        User savedUser = userRepository.save(user);
+
+        linkSocialAccount(savedUser, socialId, provider, realName);
+        log.info("User created and social account linked: {}", savedUser.getEmail());
+
+        // JWT 토큰 발급
+        String jwtToken = generateJwtToken(savedUser, provider);
+        log.debug("Generated JWT Token for new user: {}", jwtToken);
+
+        return jwtToken;
+    }
+
+    /**
+     * 소셜 계정을 사용자와 연동
+     *
+     * @param user      사용자
+     * @param socialId  소셜 계정 ID
+     * @param provider  소셜 제공자
+     * @param realName  실명
+     */
+    private void linkSocialAccount(User user, String socialId, String provider, String realName) {
+        SocialUser socialUser = new SocialUser();
+        socialUser.setUser(user);
+        socialUser.setSocialId(socialId);
+        socialUser.setProvider(provider);
+        socialUser.setEmail(user.getEmail());
+        socialUser.setRealname(realName);
+        socialUserRepository.save(socialUser);
+        log.debug("Linked social account with socialId={} and provider={} to user={}", socialId, provider, user.getEmail());
     }
 
     /**
@@ -84,6 +151,30 @@ public class SocialLoginService {
         claims.put("realName", user.getRealname());
         claims.put("provider", provider);
 
-        return jwtProvider.generateToken(claims);
+        String jwtToken = jwtProvider.generateToken(claims);
+
+        // 디버깅 로그
+        log.debug("Generated JWT Token: {}", jwtToken);
+
+        return jwtToken;
+    }
+
+    /**
+     * UNIQUE한 USERNAME 생성
+     *
+     * @param email 이메일
+     * @return 고유한 USERNAME
+     */
+    private String generateUniqueUsername(String email) {
+        String baseUsername = email.split("@")[0]; // "user1" from "user1@example.com"
+        String uniqueUsername = baseUsername;
+        int counter = 1;
+
+        while (userRepository.existsByUsername(uniqueUsername)) {
+            uniqueUsername = baseUsername + "_" + counter;
+            counter++;
+        }
+
+        return uniqueUsername;
     }
 }
