@@ -16,6 +16,8 @@ import GoogleAuth from 'vue3-google-oauth2';
 
 const app = createApp(App);
 
+store.dispatch('checkLoginState');
+
 // Google OAuth2 설정 객체
 const gAuthOptions = {
   clientId: '69828466810-cho87reh7vfoke4ef242tr6g610bsupj.apps.googleusercontent.com',  // 발급받은 클라이언트 ID를 입력하세요

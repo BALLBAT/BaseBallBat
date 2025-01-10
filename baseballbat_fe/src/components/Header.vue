@@ -59,22 +59,16 @@ import { mapGetters } from 'vuex';
 export default {
   name: "SiteHeader",
   computed: {
-    ...mapGetters(['isLoggedIn']), // Vuex의 isLoggedIn getter를 사용하여 로그인 상태를 가져옵니다.
+    ...mapGetters(['isLoggedIn', "getUsername"]), // Vuex의 isLoggedIn getter를 사용하여 로그인 상태를 가져옵니다.
   },
   methods: {
     // 로그인 버튼 클릭시 로그인 페이지 이동
     login() {
-      this.$router.push('/login');
+      this.$router.push("/login");
     },
-    // 로그아웃 버튼 클릭시 로그아웃 처리
     logout() {
-      // 로그아웃 상태를 Vuex store를 통해 반영
-      this.$store.dispatch('logout');
-      
-      // 로그아웃 후 로그인 페이지로 이동
-      setTimeout(() => {
-        this.$router.push('/login');
-      }, 100);
+      this.$store.dispatch("logout"); // Vuex 로그아웃 액션 호출
+      this.$router.push("/login"); // 로그아웃 후 로그인 페이지로 이동
     },
   },
 };

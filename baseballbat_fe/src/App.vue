@@ -16,14 +16,24 @@ import SiteFooter from './components/Footer.vue'; // 푸터 컴포넌트 임포�
 
 import LoginService from './services/auth/LoginService'; // 로그인 상태 확인
 
+import { mapActions } from "vuex";
+
 export default {
   name: 'App',
   components: {
     SiteHeader, // 헤더 컴포넌트를 사용할 수 있도록 설정
     SiteFooter, // 푸터 컴포넌트를 사용할 수 있도록 설정
   },
+  methods: {
+        ...mapActions(["checkLoginState"]),
+  },
+  mounted() {
+        // this.checkL/oginState(); // 애플리케이션 초기화 시 로그인 상태 확인
+  },
   created() {
     console.log('App component created');
+
+    // 애플리케이션 시작 시 Vuex의 checkLoginState 호출
     
     // App이 처음 시작될 때 로그인 상태를 체크합니다.
     const token = localStorage.getItem('authToken');

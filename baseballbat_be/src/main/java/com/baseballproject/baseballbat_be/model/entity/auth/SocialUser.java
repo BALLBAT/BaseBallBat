@@ -46,6 +46,9 @@ public class SocialUser {
     @Column(name = "EMAIL", nullable = false)
     private String email; // 소셜 로그인 사용자의 이메일
 
+    @Column(name = "REALNAME")
+    private String realname; // 소셜 로그인 사용자의 이름
+
     @Column(name = "CREATED_AT", updatable = false)
     private LocalDateTime createdAt;
 

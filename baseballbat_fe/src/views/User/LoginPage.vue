@@ -55,7 +55,11 @@ export default {
       this.$router.push("/main");
     }
 
+    // 페이지 로드 시 소셜 로그인 상태 확인
+    this.checkLoginStatus();
+
     // URL에서 네이버 로그인 결과 확인
+    // 네이버 로그인 콜백 처리
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
     const state = urlParams.get("state");
@@ -114,6 +118,25 @@ export default {
   methods: {
     ...mapActions(["login"]),
 
+    // JWT 쿠키 가져오기
+    getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(";").shift();
+    },
+
+    // 로그인 상태 확인
+    checkLoginStatus() {
+      const jwt = this.getCookie("jwt");
+      if (jwt) {
+        console.log("로그인 상태 확인: JWT 존재");
+        this.$router.push("/main"); // 로그인된 상태일 경우 메인 페이지로 이동
+      } else {
+        console.log("로그인되지 않은 상태");
+        // 로그인되지 않은 상태일 경우 현재 페이지 유지 또는 처리 추가
+      }
+    },
+
     async login() {
       try {
         console.log("일반 로그인 시도:", this.username, "비밀번호는?", this.password);
@@ -160,50 +183,52 @@ export default {
     // 네이버 로그인 버튼 클릭
     handleNaverLogin() {
       const clientId = "1SzX67SVz98SbWZaCDoK"; // 네이버 클라이언트 ID
-      const redirectUri = encodeURIComponent("http://localhost:8000/api/naver/callback");
+      const redirectUri = encodeURIComponent("http://localhost:8000/api/auth/naver/callback");
       const state = "randomStateValue"; // CSRF 방지를 위한 상태 값
       const naverLoginUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
       window.location.href = naverLoginUrl;
     },
 
-    // 네이버 로그인 콜백 처리
+// 네이버 로그인 콜백 처리
 async handleNaverCallback(code, state) {
+    console.log("Naver callback started with code:", code, "and state:", state);
     try {
         const response = await axios.get(
-            `http://localhost:8000/api/naver/callback?code=${code}&state=${state}`
+            `http://localhost:8000/api/auth/naver/callback?code=${code}&state=${state}`
         );
+        console.log("Response from server:", response.data);
 
-        const { token, needsAdditionalInfo, email, socialId, provider } = response.data;
-
-        if (needsAdditionalInfo) {
-            // 추가 정보 입력 페이지로 이동
-            this.$router.push({
-                name: 'additionalInfo',
-                query: { email, socialId, provider }
-            });
+        if (response.data.success) {
+            console.log("JWT Token received:", response.data.token);
+            document.cookie = `jwt=${response.data.token}; path=/; secure=false; HttpOnly=false`;
+            this.$router.push('/main');
         } else {
-            // JWT 저장
-            localStorage.setItem("jwt", token);
-            alert("로그인 성공!");
-            this.$router.push("/main");
+            console.error("Login failed with message:", response.data.message);
+            alert(`로그인 실패: ${response.data.message || "알 수 없는 오류"}`);
+            this.$router.push('/login');
         }
     } catch (error) {
-        console.error("네이버 로그인 처리 중 오류 발생:", error);
-        alert("로그인 처리에 실패했습니다.");
+        console.error("Error during Naver login callback:", error);
+        alert("네이버 로그인 처리에 실패했습니다.");
+        this.$router.push('/login');
     }
 },
 
-async saveAdditionalInfo(data) {
-    try {
+    async saveAdditionalInfo(data) {
+      try {
         const response = await axios.post("http://localhost:8000/api/user/additional-info", data);
-        console.log("추가 정보 저장 응답:", response); // 로그 출력
-        alert("추가 정보 저장 성공!");
+        console.log("추가 정보 저장 응답:", response.data);
+        alert("추가 정보 저장이 완료되었습니다!");
         this.$router.push("/main");
-    } catch (error) {
+      } catch (error) {
         console.error("추가 정보 저장 실패:", error);
-        alert("추가 정보를 저장하는 중 문제가 발생했습니다.");
-    }
-},
+        if (error.response) {
+          alert(`추가 정보 저장 실패: ${error.response.data.message || "알 수 없는 오류"}`);
+        } else {
+          alert("추가 정보 저장 중 네트워크 오류가 발생했습니다.");
+        }
+      }
+    },
 
     signInWithGoogle() {
       window.google.accounts.id.prompt();
