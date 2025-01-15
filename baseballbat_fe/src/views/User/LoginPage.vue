@@ -200,7 +200,7 @@ async handleNaverCallback(code, state) {
 
         if (response.data.success) {
             console.log("JWT Token received:", response.data.token);
-            document.cookie = `jwt=${response.data.token}; path=/; secure=false; HttpOnly=false`;
+            document.cookie = `jwt=${response.data.token}; path=/; secure=false; HttpOnly=true`;
             this.$router.push('/main');
         } else {
             console.error("Login failed with message:", response.data.message);
