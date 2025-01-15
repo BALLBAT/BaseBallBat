@@ -14,6 +14,13 @@ import '@/assets/css/global.css';
 // Google OAuth 라이브러리 추가
 import GoogleAuth from 'vue3-google-oauth2';
 
+// Axios 설정 추가
+import axios from 'axios';
+
+// Axios 기본 설정 추가
+axios.defaults.baseURL = 'http://localhost:8000'; // API 서버 URL
+axios.defaults.withCredentials = true; // 쿠키 기반 인증 허용
+
 const app = createApp(App);
 
 store.dispatch('checkLoginState');

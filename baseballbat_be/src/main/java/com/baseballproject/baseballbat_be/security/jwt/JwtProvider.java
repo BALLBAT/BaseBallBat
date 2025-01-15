@@ -3,6 +3,7 @@ package com.baseballproject.baseballbat_be.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +48,7 @@ public class JwtProvider {
     }
 
     /**
-     * JWT 토큰에서 특정 클레임 값 추출
+     * JWT 토큰에서 클레임 추출
      *
      * @param token JWT 토큰
      * @param key   클레임 키
@@ -68,16 +69,6 @@ public class JwtProvider {
     }
 
     /**
-     * JWT 토큰에서 소셜 제공자 추출
-     *
-     * @param token JWT 토큰
-     * @return 소셜 제공자 (provider)
-     */
-    public String extractProvider(String token) {
-        return (String) extractClaim(token, "provider");
-    }
-
-    /**
      * JWT 토큰의 유효성 검증
      *
      * @param token JWT 토큰
@@ -92,7 +83,35 @@ public class JwtProvider {
     }
 
     /**
-     * JWT 토큰의 만료 여부 확인
+     * HTTP 요청에서 JWT 추출 (쿠키 또는 Authorization 헤더)
+     *
+     * @param request HttpServletRequest
+     * @return JWT 토큰 (없으면 null)
+     */
+    public String resolveToken(HttpServletRequest request) {
+        // 쿠키에서 JWT 추출
+        if (request.getCookies() != null) {
+            String cookieToken = java.util.Arrays.stream(request.getCookies())
+                    .filter(cookie -> "jwt".equals(cookie.getName()))
+                    .map(jakarta.servlet.http.Cookie::getValue) // jakarta.servlet.http.Cookie로 수정
+                    .findFirst()
+                    .orElse(null);
+            if (cookieToken != null) {
+                return cookieToken;
+            }
+        }
+
+        // Authorization 헤더에서 JWT 추출
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+
+        return null; // JWT가 없는 경우
+    }
+
+    /**
+     * JWT 토큰 만료 여부 확인
      *
      * @param token JWT 토큰
      * @return 만료 여부
