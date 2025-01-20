@@ -51,20 +51,42 @@ export default createStore({
       localStorage.removeItem('authToken');
     },
     checkLoginState({ commit }) {
-      axios.get('http://localhost:8000/api/auth/validate-token', { withCredentials: true })
-          .then(response => {
-              console.log("JWT 유효성 확인 성공:", response.data);
-              commit('setLoginState', {
-                  isLoggedIn: true,
-                  token: response.data.token, // 필요 시
-                  username: response.data.username, // 필요 시
-              });
-          })
-          .catch(error => {
-              console.error("JWT 유효성 확인 실패:", error);
-              commit('logout');
+      console.log("checkLoginState 호출됨");
+    
+      // 1. 로컬스토리지에서 JWT 확인 (일반 로그인)
+      const localToken = localStorage.getItem("authToken");
+      if (localToken) {
+        console.log("로컬스토리지에서 JWT 확인됨:", localToken);
+        commit("setLoginState", {
+          isLoggedIn: true,
+          token: localToken,
+          username: null, // 필요 시 사용자 이름 추가
+          loginMethod: "LOCAL", // 일반 로그인 방식으로 설정
+        });
+        return; // 일반 로그인 상태 확인 후 추가 검사는 생략
+      }
+    
+      // 2. 백엔드에서 소셜 로그인 JWT 유효성 검증
+      axios
+        .get("http://localhost:8000/api/auth/validate-token", { withCredentials: true })
+        .then((response) => {
+          console.log("소셜 로그인 JWT 유효성 확인 성공:", response.data);
+    
+          commit("setLoginState", {
+            isLoggedIn: true,
+            token: response.data.token, // 필요 시 서버에서 반환된 JWT
+            username: response.data.username || null, // 필요 시 서버에서 반환된 사용자 이름
+            loginMethod: "SOCIAL", // 소셜 로그인 방식으로 설정
           });
-  } ,
+        })
+        .catch((error) => {
+          console.error("소셜 로그인 JWT 유효성 확인 실패:", error);
+    
+          // 소셜 로그인 JWT가 유효하지 않은 경우 로그아웃 처리
+          document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          commit("logout");
+        });
+    },    
   },
   modules: {},
 });
